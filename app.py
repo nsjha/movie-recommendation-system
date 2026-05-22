@@ -1,4 +1,4 @@
-import pickle
+import joblib
 from pathlib import Path
 
 import pandas as pd
@@ -23,18 +23,20 @@ TMDB_MOVIE_URL = "https://api.themoviedb.org/3/movie/{}"
 TMDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500{}"
 
 # =========================================================
-# LOAD FILES
+# LOAD DATA
 # =========================================================
 
-with open(BASE_DIR / "movies_dict.pkl", "rb") as f:
-    movies_dict = pickle.load(f)
+movies = pd.DataFrame(
+    joblib.load(BASE_DIR / "movies_dict.pkl")
+)
 
-with open(BASE_DIR / "similarity.pkl", "rb") as f:
-    similarity = pickle.load(f)
+similarity = joblib.load(
+    BASE_DIR / "similarity.pkl"
+)
 
-movies = pd.DataFrame(movies_dict)
-
-movie_titles = sorted(movies["title"].dropna().unique())
+movie_titles = sorted(
+    movies["title"].dropna().unique()
+)
 
 # =========================================================
 # FETCH POSTER
@@ -57,7 +59,10 @@ def fetch_poster(movie_id):
         poster_path = data.get("poster_path")
 
         if poster_path:
-            return TMDB_IMAGE_URL.format(poster_path)
+
+            return TMDB_IMAGE_URL.format(
+                poster_path
+            )
 
         return None
 
@@ -74,43 +79,51 @@ def search_movies(query):
 
     results = []
 
+    # Startswith results first
     for title in movie_titles:
 
-        title_lower = title.lower()
+        if title.lower().startswith(query):
 
-        if title_lower.startswith(query):
             results.append(title)
 
+    # Partial results
     for title in movie_titles:
 
-        title_lower = title.lower()
+        if query in title.lower():
 
-        if query in title_lower and title not in results:
-            results.append(title)
+            if title not in results:
+
+                results.append(title)
 
     return results[:8]
 
 # =========================================================
-# GET BEST MATCH
+# BEST MATCH
 # =========================================================
 
 def get_best_match(user_input):
 
     user_input = user_input.lower().strip()
 
+    # Exact
     for title in movie_titles:
 
         if title.lower() == user_input:
+
             return title
 
+    # Startswith
     for title in movie_titles:
 
         if title.lower().startswith(user_input):
+
             return title
 
+    # Partial
     for title in movie_titles:
 
         if user_input in title.lower():
+
             return title
 
     return None
@@ -124,9 +137,12 @@ def recommend(movie_name):
     matched_movie = get_best_match(movie_name)
 
     if not matched_movie:
+
         return []
 
-    movie_index = movies[movies["title"] == matched_movie].index[0]
+    movie_index = movies[
+        movies["title"] == matched_movie
+    ].index[0]
 
     distances = similarity[movie_index]
 
@@ -149,14 +165,16 @@ def recommend(movie_name):
         poster = fetch_poster(movie_id)
 
         recommendations.append({
+
             "title": title,
             "poster": poster
+
         })
 
     return recommendations
 
 # =========================================================
-# BEAUTIFUL RESPONSIVE UI
+# HTML UI
 # =========================================================
 
 HTML = """
@@ -167,13 +185,17 @@ HTML = """
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>Movie Recommendation System</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
 
 <style>
 
@@ -185,35 +207,47 @@ HTML = """
 }
 
 body{
+
     background:
-    radial-gradient(circle at top left,#0f172a,#020617 60%);
+    radial-gradient(circle at top left,
+    #0f172a,
+    #020617 60%);
+
     color:white;
+
     min-height:100vh;
+
     overflow-x:hidden;
 }
 
-/* ================================================= */
+/* ========================================= */
 /* CONTAINER */
-/* ================================================= */
+/* ========================================= */
 
 .container{
+
     width:min(1450px,94%);
+
     margin:auto;
+
     padding:40px 0 70px;
 }
 
-/* ================================================= */
-/* HERO SECTION */
-/* ================================================= */
+/* ========================================= */
+/* HERO */
+/* ========================================= */
 
 .hero{
+
     margin-bottom:50px;
 }
 
 .heading{
 
     font-size:clamp(52px,9vw,120px);
+
     font-weight:800;
+
     line-height:0.95;
 
     background:linear-gradient(
@@ -224,6 +258,7 @@ body{
     );
 
     -webkit-background-clip:text;
+
     -webkit-text-fill-color:transparent;
 
     letter-spacing:-4px;
@@ -234,6 +269,7 @@ body{
 }
 
 .heading span{
+
     display:block;
 }
 
@@ -250,13 +286,16 @@ body{
     animation:fadeUp 1.3s ease;
 }
 
-/* ================================================= */
+/* ========================================= */
 /* SEARCH */
-/* ================================================= */
+/* ========================================= */
 
 .search-wrapper{
+
     position:relative;
+
     margin-top:45px;
+
     margin-bottom:20px;
 }
 
@@ -284,6 +323,7 @@ input{
 }
 
 input::placeholder{
+
     color:#7c8aa0;
 }
 
@@ -297,9 +337,9 @@ input:focus{
     transform:scale(1.01);
 }
 
-/* ================================================= */
+/* ========================================= */
 /* SUGGESTIONS */
-/* ================================================= */
+/* ========================================= */
 
 .suggestions{
 
@@ -342,9 +382,9 @@ input:focus{
     padding-left:32px;
 }
 
-/* ================================================= */
-/* MOVIE GRID */
-/* ================================================= */
+/* ========================================= */
+/* MOVIES GRID */
+/* ========================================= */
 
 .movies-grid{
 
@@ -358,9 +398,9 @@ input:focus{
     margin-top:55px;
 }
 
-/* ================================================= */
+/* ========================================= */
 /* CARD */
-/* ================================================= */
+/* ========================================= */
 
 .movie-card{
 
@@ -379,8 +419,6 @@ input:focus{
     flex-direction:column;
 
     height:100%;
-
-    position:relative;
 }
 
 .movie-card:hover{
@@ -393,9 +431,9 @@ input:focus{
     0 25px 45px rgba(0,0,0,0.5);
 }
 
-/* ================================================= */
+/* ========================================= */
 /* IMAGE */
-/* ================================================= */
+/* ========================================= */
 
 .movie-card img{
 
@@ -427,9 +465,9 @@ input:focus{
     font-size:18px;
 }
 
-/* ================================================= */
+/* ========================================= */
 /* INFO */
-/* ================================================= */
+/* ========================================= */
 
 .movie-info{
 
@@ -460,26 +498,30 @@ input:focus{
     margin-top:15px;
 }
 
-/* ================================================= */
+/* ========================================= */
 /* ANIMATION */
-/* ================================================= */
+/* ========================================= */
 
 @keyframes fadeUp{
 
     from{
+
         opacity:0;
+
         transform:translateY(30px);
     }
 
     to{
+
         opacity:1;
+
         transform:translateY(0);
     }
 }
 
-/* ================================================= */
+/* ========================================= */
 /* TABLET */
-/* ================================================= */
+/* ========================================= */
 
 @media(max-width:992px){
 
@@ -492,18 +534,21 @@ input:focus{
     }
 
     .heading{
+
         letter-spacing:-2px;
     }
 }
 
-/* ================================================= */
+/* ========================================= */
 /* MOBILE */
-/* ================================================= */
+/* ========================================= */
 
 @media(max-width:600px){
 
     .container{
+
         width:92%;
+
         padding-top:30px;
     }
 
@@ -522,6 +567,7 @@ input:focus{
     }
 
     .movie-info{
+
         padding:18px;
     }
 
@@ -540,6 +586,7 @@ input:focus{
     }
 
     .subtitle{
+
         line-height:1.5;
     }
 }
@@ -587,7 +634,8 @@ Search any movie and instantly discover top 5 similar recommendations with beaut
     value="{{selected_movie}}"
 />
 
-<div class="suggestions" id="suggestions"></div>
+<div class="suggestions"
+id="suggestions"></div>
 
 </div>
 
@@ -613,7 +661,8 @@ Search any movie and instantly discover top 5 similar recommendations with beaut
 
 {% if movie.poster %}
 
-<img src="{{movie.poster}}" alt="{{movie.title}}">
+<img src="{{movie.poster}}"
+alt="{{movie.title}}">
 
 {% else %}
 
@@ -643,13 +692,18 @@ Poster unavailable
 
 <script>
 
-const input = document.getElementById("movieInput");
-const suggestions = document.getElementById("suggestions");
-const form = document.getElementById("movieForm");
+const input =
+document.getElementById("movieInput");
 
-// =======================================
-// AUTOCOMPLETE
-// =======================================
+const suggestions =
+document.getElementById("suggestions");
+
+const form =
+document.getElementById("movieForm");
+
+/* ========================================= */
+/* AUTOCOMPLETE */
+/* ========================================= */
 
 input.addEventListener("keyup", async () => {
 
@@ -662,17 +716,22 @@ input.addEventListener("keyup", async () => {
         return;
     }
 
-    const response = await fetch(`/search?q=${query}`);
+    const response =
+    await fetch(`/search?q=${query}`);
 
-    const data = await response.json();
+    const data =
+    await response.json();
 
     suggestions.innerHTML = "";
 
     data.forEach(movie => {
 
-        const div = document.createElement("div");
+        const div =
+        document.createElement("div");
 
-        div.classList.add("suggestion-item");
+        div.classList.add(
+        "suggestion-item"
+        );
 
         div.innerText = movie;
 
@@ -689,11 +748,13 @@ input.addEventListener("keyup", async () => {
     });
 });
 
-// =======================================
-// ENTER KEY
-// =======================================
+/* ========================================= */
+/* ENTER KEY */
+/* ========================================= */
 
-input.addEventListener("keypress", function(event){
+input.addEventListener(
+"keypress",
+function(event){
 
     if(event.key === "Enter"){
 
@@ -703,13 +764,18 @@ input.addEventListener("keypress", function(event){
     }
 });
 
-// =======================================
-// HIDE SUGGESTIONS
-// =======================================
+/* ========================================= */
+/* HIDE SUGGESTIONS */
+/* ========================================= */
 
-document.addEventListener("click", function(event){
+document.addEventListener(
+"click",
+function(event){
 
-    if(!event.target.closest(".search-wrapper")){
+    if(
+    !event.target.closest(
+    ".search-wrapper"
+    )){
 
         suggestions.innerHTML = "";
     }
@@ -737,17 +803,30 @@ def home():
 
     if request.method == "POST":
 
-        selected_movie = request.form.get("movie", "").strip()
+        selected_movie = request.form.get(
+            "movie",
+            ""
+        ).strip()
 
-        recommendations = recommend(selected_movie)
+        recommendations = recommend(
+            selected_movie
+        )
 
         if not recommendations:
-            error = "Movie not found. Try another movie."
+
+            error = (
+            "Movie not found. "
+            "Try another movie."
+            )
 
     return render_template_string(
+
         HTML,
+
         recommendations=recommendations,
+
         selected_movie=selected_movie,
+
         error=error
     )
 
@@ -782,7 +861,10 @@ def health():
 if __name__ == "__main__":
 
     app.run(
+
         host="0.0.0.0",
+
         port=8000,
+
         debug=True
     )
