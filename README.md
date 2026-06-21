@@ -6,7 +6,7 @@ A content-based movie recommendation system built with Python and deployed as a 
 
 ## 🚀 Live Demo
 
-> Deployed via Heroku · [Add your live link here]
+> Deployed via Render · (https://movie-recommendation-system-ww2m.onrender.com/)
 
 ---
 
@@ -32,8 +32,8 @@ movie-recommendation-system/
 ├── tmdb_5000_movies.csv            # TMDB movies metadata
 ├── tmdb_5000_credits.csv           # TMDB cast & crew data
 ├── requirements.txt                # Python dependencies
-├── Procfile                        # Heroku deployment config
-└── setup.sh                        # Heroku server setup script
+├── Procfile                        # Render deployment config
+└── setup.sh                        # Render server setup script
 ```
 
 ---
@@ -52,7 +52,7 @@ movie-recommendation-system/
 
 | Layer | Technology |
 |---|---|
-| Language | Python 3.x |
+| Language | Python 3.10 |
 | Data Processing | Pandas, NumPy |
 | ML / NLP | Scikit-learn (CountVectorizer, Cosine Similarity) |
 | Web App | Streamlit / Flask |
@@ -100,13 +100,14 @@ http://localhost:8501
 
 ## 📸 Screenshots
 
-> *(Add screenshots of your app here)*
+> <img width="787" height="667" alt="image" src="https://github.com/user-attachments/assets/af0cfe70-4cce-4ece-a379-ed14ef929cea" />
+
 
 ---
 
 ## 🚢 Deployment (Render)
 
-This app is deployed on [Render](https://render.com). To deploy your own instance:
+This app is deployed on [Render](https://movie-recommendation-system-ww2m.onrender.com/). To deploy your own instance:
 
 1. Push your code to GitHub
 2. Go to [render.com](https://render.com) and create a **New Web Service**
@@ -122,7 +123,7 @@ This app is deployed on [Render](https://render.com). To deploy your own instanc
 
 **Nishant Saurav (Jimmy)**  
 B.Tech Mechanical Engineering | IIT Bhilai  
-[GitHub](https://github.com/nsjha) · [LinkedIn](https://linkedin.com/in/your-profile)
+[GitHub](https://github.com/nsjha)
 
 ---
 
